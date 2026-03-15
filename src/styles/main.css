@@ -1,25 +1,44 @@
 /* ========================================
-   Global Reset & Variables
+   Global Reset & Design Tokens
    ======================================== */
 
 :root {
-  --bg-primary: #0f0f13;
-  --bg-secondary: #1a1a24;
-  --bg-tertiary: #252533;
-  --text-primary: #e4e4e7;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  --accent-primary: #667eea;
-  --accent-hover: #7c8ff5;
+  /* Light panel theme */
+  --bg-panel: rgba(255, 255, 255, 0.96);
+  --bg-section: #f8f8fa;
+  --bg-hover: #f0f0f4;
+  --bg-active: #e8e8ee;
+
+  --text-primary: #222222;
+  --text-secondary: #7a7a7a;
+  --text-muted: #a0a0a8;
+  --text-on-accent: #ffffff;
+
+  --accent: #667eea;
+  --accent-hover: #5a6fd6;
+  --accent-light: rgba(102, 126, 234, 0.1);
+  --accent-medium: rgba(102, 126, 234, 0.2);
+
   --danger: #ef4444;
   --danger-hover: #dc2626;
-  --border: #2d2d3d;
-  --radius-sm: 4px;
+  --danger-light: rgba(239, 68, 68, 0.08);
+
+  --border: #eaeaea;
+  --border-strong: #dadadf;
+  --divider: #f2f2f2;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
   --radius-md: 8px;
-  --radius-lg: 12px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+
   --transition: 150ms ease;
+  --transition-fast: 100ms ease;
 }
 
 *,
@@ -33,13 +52,14 @@
 html,
 body {
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   user-select: none;
+  overflow: hidden;
 }
 
 /* ========================================
@@ -51,45 +71,72 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 13px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
-  background: var(--bg-tertiary);
+  background: white;
   color: var(--text-primary);
+  font-family: inherit;
+  line-height: 1;
 }
 
 .btn:hover {
-  background: #2f2f42;
+  background: var(--bg-hover);
+  border-color: var(--border-strong);
+}
+
+.btn:active {
+  background: var(--bg-active);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
 }
 
 .btn-primary {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-accent);
 }
 
 .btn-primary:hover {
   background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
-.btn-secondary {
-  background: var(--bg-tertiary);
+.btn-full {
+  width: 100%;
 }
 
-.btn-danger {
-  color: var(--danger);
-  border-color: rgba(239, 68, 68, 0.3);
+.btn-icon-only {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  background: white;
 }
 
-.btn-danger:hover {
-  background: rgba(239, 68, 68, 0.1);
+.btn-icon-only:hover:not(:disabled) {
+  background: var(--bg-hover);
 }
 
-.btn-icon {
+.btn-icon-plus {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-family: "Segoe UI", monospace;
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-secondary);
 }

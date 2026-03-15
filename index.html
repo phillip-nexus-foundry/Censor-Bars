@@ -3,37 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Censor Bars — Control Panel</title>
+    <title>Censor Bars</title>
     <link rel="stylesheet" href="/src/styles/main.css" />
     <link rel="stylesheet" href="/src/styles/control-panel.css" />
   </head>
   <body>
-    <div id="app">
-      <header class="panel-header">
-        <h1 class="panel-title">Censor Bars</h1>
-        <p class="panel-subtitle">Privacy overlay manager</p>
-      </header>
+    <div id="panel" class="panel" data-tauri-drag-region>
+      <!-- Title bar -->
+      <div class="panel-titlebar" data-tauri-drag-region>
+        <div class="panel-titlebar-left" data-tauri-drag-region>
+          <span class="panel-icon">■</span>
+          <span class="panel-title">Censor Bars</span>
+        </div>
+        <div class="panel-titlebar-right">
+          <button id="btn-minimize" class="titlebar-btn" title="Minimize to tray">
+            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="5" x2="10" y2="5" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+          <button id="btn-close" class="titlebar-btn titlebar-btn-close" title="Close to tray">
+            <svg width="10" height="10" viewBox="0 0 10 10"><line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+        </div>
+      </div>
 
-      <section class="panel-actions">
-        <button id="btn-new-bar" class="btn btn-primary">
-          <span class="btn-icon">+</span>
+      <!-- New Bar button -->
+      <div class="panel-actions">
+        <button id="btn-new-bar" class="btn btn-primary btn-full">
+          <span class="btn-icon-plus">+</span>
           New Bar
         </button>
-        <button id="btn-hide-all" class="btn btn-secondary">Hide All</button>
-        <button id="btn-show-all" class="btn btn-secondary">Show All</button>
-        <button id="btn-close-all" class="btn btn-danger">Close All</button>
-      </section>
+      </div>
 
-      <section class="panel-bar-list">
-        <h2 class="section-title">Active Bars</h2>
+      <!-- Undo/Redo indicator -->
+      <div class="panel-history">
+        <button id="btn-undo" class="btn btn-icon-only" title="Undo (Ctrl+Alt+Z)" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h13a4 4 0 0 1 0 8H7"/><path d="m3 10 4-4"/><path d="m3 10 4 4"/></svg>
+        </button>
+        <button id="btn-redo" class="btn btn-icon-only" title="Redo (Ctrl+Alt+Y)" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H8a4 4 0 1 0 0 8h9"/><path d="m21 10-4-4"/><path d="m21 10-4 4"/></svg>
+        </button>
+        <span id="history-status" class="history-status"></span>
+      </div>
+
+      <!-- Bar/Group list -->
+      <div class="panel-list-container">
+        <div class="panel-section-title">Active Bars</div>
         <div id="bar-list" class="bar-list">
-          <p class="bar-list-empty">No active bars. Click "New Bar" to start.</p>
+          <p class="bar-list-empty">No active bars.<br>Click <strong>New Bar</strong> or press <kbd>Ctrl+N</kbd></p>
         </div>
-      </section>
+      </div>
 
-      <footer class="panel-footer">
-        <span class="footer-hint">Ctrl+N: New bar &middot; Ctrl+H: Hide all &middot; Ctrl+Shift+H: Show all</span>
-      </footer>
+      <!-- Footer shortcuts -->
+      <div class="panel-footer">
+        <kbd>Ctrl+N</kbd> New &middot; <kbd>Del</kbd> Delete &middot; <kbd>Ctrl+Alt+Z/Y</kbd> Undo/Redo
+      </div>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

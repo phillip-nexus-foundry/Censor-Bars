@@ -14,13 +14,15 @@
     "windows": [
       {
         "label": "control-panel",
-        "title": "Censor Bars — Control Panel",
+        "title": "Censor Bars",
         "width": 380,
-        "height": 520,
+        "height": 500,
         "resizable": true,
         "center": true,
-        "decorations": true,
-        "transparent": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": false,
         "url": "index.html"
       }
     ],
@@ -39,9 +41,7 @@
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
+      "icons/128x128@2x.png"
     ],
     "windows": {
       "wix": {
