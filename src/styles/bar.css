@@ -1,0 +1,313 @@
+/* ========================================
+   Censor Bar Overlay Window
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  user-select: none;
+}
+
+/* --- Censor Surface --- */
+
+.censor-surface {
+  width: 100%;
+  height: 100%;
+  background: #1a1a2e;
+  cursor: move;
+  position: relative;
+  border-radius: 2px;
+  /* Subtle border so the bar is visible against similar backgrounds */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* ========================================
+   Animation Classes
+   ======================================== */
+
+/* --- Relaxing --- */
+
+.anim-ocean-wave {
+  background: linear-gradient(270deg, #667eea, #764ba2, #667eea, #43e97b);
+  background-size: 600% 600%;
+  animation: ocean-wave 12s ease infinite;
+}
+
+@keyframes ocean-wave {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.anim-breathing {
+  background: linear-gradient(135deg, #1a1a2e, #2d1b69);
+  animation: breathing 6s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1.0; }
+}
+
+.anim-sunset-drift {
+  background: linear-gradient(135deg, #f093fb, #f5576c, #ffecd2, #fcb69f);
+  background-size: 400% 400%;
+  animation: sunset-drift 16s ease infinite;
+}
+
+@keyframes sunset-drift {
+  0% { background-position: 0% 50%; }
+  33% { background-position: 100% 0%; }
+  66% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+.anim-aurora {
+  background: linear-gradient(135deg, #0f3443, #34e89e, #0f3443, #667eea, #0f3443);
+  background-size: 500% 500%;
+  animation: aurora 20s ease infinite;
+}
+
+@keyframes aurora {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 0%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* --- Energetic --- */
+
+.anim-neon-pulse {
+  background: linear-gradient(90deg, #00f260, #0575e6, #ff0844, #00f260);
+  background-size: 300% 300%;
+  animation: neon-pulse 3s linear infinite;
+}
+
+@keyframes neon-pulse {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.anim-rainbow-sweep {
+  background: linear-gradient(
+    90deg,
+    #ff0000, #ff7700, #ffff00, #00ff00, #0077ff, #8b00ff, #ff0000
+  );
+  background-size: 700% 100%;
+  animation: rainbow-sweep 4s linear infinite;
+}
+
+@keyframes rainbow-sweep {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 700% 50%; }
+}
+
+.anim-digital-rain {
+  background: #0a0a0a;
+  position: relative;
+  overflow: hidden;
+}
+
+.anim-digital-rain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 65, 0.03) 2px,
+    rgba(0, 255, 65, 0.03) 4px
+  );
+  animation: digital-rain-scan 2s linear infinite;
+}
+
+@keyframes digital-rain-scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.anim-lava-flow {
+  background: linear-gradient(135deg, #f12711, #f5af19, #f12711, #e44d26, #f5af19);
+  background-size: 500% 500%;
+  animation: lava-flow 10s ease infinite;
+}
+
+@keyframes lava-flow {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 25%; }
+  50% { background-position: 50% 100%; }
+  75% { background-position: 0% 75%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========================================
+   Context Menu
+   ======================================== */
+
+.context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: #1a1a24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 220px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+}
+
+.context-menu.hidden {
+  display: none;
+}
+
+.context-section {
+  padding: 4px 0;
+}
+
+.context-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #71717a;
+  padding: 4px 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.context-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 0;
+}
+
+/* --- Color Grid --- */
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+  padding: 4px 4px;
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+
+.color-swatch:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  z-index: 1;
+}
+
+/* --- Gradient Grid --- */
+
+.gradient-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px;
+}
+
+.gradient-swatch {
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 100ms ease;
+}
+
+.gradient-swatch:hover {
+  transform: scale(1.05);
+}
+
+/* --- Animation List --- */
+
+.animation-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 8px;
+  background: none;
+  border: none;
+  color: #e4e4e7;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 100ms ease;
+  font-family: inherit;
+}
+
+.animation-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.animation-name {
+  font-weight: 500;
+}
+
+.animation-mood {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.animation-mood.relaxing {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+.animation-mood.energetic {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
+
+/* --- Opacity Slider --- */
+
+.opacity-slider {
+  width: calc(100% - 16px);
+  margin: 4px 8px;
+  accent-color: #667eea;
+}
+
+/* --- Close Button --- */
+
+.context-btn {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+  transition: background 100ms ease;
+  font-family: inherit;
+}
+
+.context-btn-close {
+  color: #ef4444;
+}
+
+.context-btn-close:hover {
+  background: rgba(239, 68, 68, 0.1);
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Censor Bar</title>
+    <link rel="stylesheet" href="/src/styles/bar.css" />
+  </head>
+  <body>
+    <div id="censor-surface" class="censor-surface" data-tauri-drag-region>
+      <!-- The visible censor overlay — styled dynamically -->
+    </div>
+
+    <!-- Right-click context menu -->
+    <div id="context-menu" class="context-menu hidden">
+      <div class="context-section">
+        <div class="context-label">Solid Colors</div>
+        <div class="color-grid" id="color-grid"></div>
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-section">
+        <div class="context-label">Gradients</div>
+        <div class="gradient-grid" id="gradient-grid"></div>
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-section">
+        <div class="context-label">Animations</div>
+        <div class="animation-list" id="animation-list"></div>
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-section">
+        <div class="context-label">Opacity</div>
+        <input type="range" id="opacity-slider" min="0" max="100" value="100" class="opacity-slider" />
+      </div>
+      <div class="context-divider"></div>
+      <button class="context-btn context-btn-close" id="btn-close-bar">Close This Bar</button>
+    </div>
+
+    <script type="module" src="/src/bar.js"></script>
+  </body>
+</html>

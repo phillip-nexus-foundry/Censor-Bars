@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Censor Bars — Control Panel</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="/src/styles/control-panel.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="panel-header">
+        <h1 class="panel-title">Censor Bars</h1>
+        <p class="panel-subtitle">Privacy overlay manager</p>
+      </header>
+
+      <section class="panel-actions">
+        <button id="btn-new-bar" class="btn btn-primary">
+          <span class="btn-icon">+</span>
+          New Bar
+        </button>
+        <button id="btn-hide-all" class="btn btn-secondary">Hide All</button>
+        <button id="btn-show-all" class="btn btn-secondary">Show All</button>
+        <button id="btn-close-all" class="btn btn-danger">Close All</button>
+      </section>
+
+      <section class="panel-bar-list">
+        <h2 class="section-title">Active Bars</h2>
+        <div id="bar-list" class="bar-list">
+          <p class="bar-list-empty">No active bars. Click "New Bar" to start.</p>
+        </div>
+      </section>
+
+      <footer class="panel-footer">
+        <span class="footer-hint">Ctrl+N: New bar &middot; Ctrl+H: Hide all &middot; Ctrl+Shift+H: Show all</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

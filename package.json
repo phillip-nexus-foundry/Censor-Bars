@@ -1,0 +1,24 @@
+{
+  "name": "censor-bars",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy screen overlay — resizable censor bars for screen sharing protection",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@tauri-apps/api": "^2",
+    "vite": "^6",
+    "vitest": "^3",
+    "eslint": "^9"
+  }
+}
