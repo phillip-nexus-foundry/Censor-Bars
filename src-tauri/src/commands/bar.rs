@@ -29,6 +29,7 @@ pub fn spawn_bar_window(app: &AppHandle, bar: &BarState) -> Result<(), String> {
         .transparent(true)
         .always_on_top(true)
         .resizable(true)
+        .maximizable(false)
         .skip_taskbar(true)
         .build()
         .map_err(|e| format!("Failed to create bar window: {}", e))?;

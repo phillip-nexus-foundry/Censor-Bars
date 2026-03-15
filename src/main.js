@@ -23,11 +23,11 @@ let groups = [];
 const appWindow = getCurrentWindow();
 
 btnClose.addEventListener("click", () => {
-  appWindow.hide();
+  appWindow.minimize();
 });
 
 btnMinimize.addEventListener("click", () => {
-  appWindow.hide();
+  appWindow.minimize();
 });
 
 // --- Create bar ---

@@ -7,6 +7,17 @@
 const { invoke } = window.__TAURI__.core;
 const { getCurrentWindow } = window.__TAURI__.window;
 
+// --- Block ALL default browser context menus globally ---
+document.addEventListener("contextmenu", (e) => {
+  // Only allow our custom context menu, never the browser/WebView default
+  e.preventDefault();
+});
+
+// --- Block double-click maximize ---
+document.addEventListener("dblclick", (e) => {
+  e.preventDefault();
+});
+
 // --- Parse bar ID from URL ---
 const params = new URLSearchParams(window.location.search);
 const barId = params.get("id");
@@ -184,7 +195,7 @@ function updateGroupBadge() {
   }
 }
 
-// --- Click handling: selection ---
+// --- Click handling: selection + drag ---
 surface.addEventListener("mousedown", async (e) => {
   if (e.button !== 0) return; // Only left click
 
@@ -200,7 +211,7 @@ surface.addEventListener("mousedown", async (e) => {
   isSelected = true;
   surface.classList.add("selected");
 
-  // Track drag start for undo batching
+  // Capture drag start positions for undo batching
   isDragging = true;
   try {
     const pos = await thisWindow.outerPosition();
@@ -217,38 +228,40 @@ surface.addEventListener("mousedown", async (e) => {
   } catch (err) {
     console.error("Failed to capture drag start:", err);
   }
-});
 
-// --- Record drag end for undo ---
-surface.addEventListener("mouseup", async () => {
-  if (!isDragging || dragStartPositions.length === 0) {
-    isDragging = false;
-    return;
-  }
-  isDragging = false;
-
+  // Initiate Tauri window drag
   try {
-    const pos = await thisWindow.outerPosition();
-    const startPos = dragStartPositions.find((p) => p.barId === barId);
-    if (!startPos) return;
-
-    const dx = pos.x - startPos.x;
-    const dy = pos.y - startPos.y;
-
-    // Only record if actually moved
-    if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
-
-    const moves = dragStartPositions.map((sp) => ({
-      barId: sp.barId,
-      oldX: sp.x,
-      oldY: sp.y,
-      newX: sp.x + dx,
-      newY: sp.y + dy,
-    }));
-
-    await invoke("record_move", { moves });
+    await thisWindow.startDragging();
   } catch (err) {
-    console.error("Failed to record move:", err);
+    // startDragging can throw if released immediately — that's fine
+  }
+
+  // After drag completes (startDragging resolves when mouse is released),
+  // record the move for undo
+  if (isDragging && dragStartPositions.length > 0) {
+    isDragging = false;
+    try {
+      const pos = await thisWindow.outerPosition();
+      const startPos = dragStartPositions.find((p) => p.barId === barId);
+      if (startPos) {
+        const dx = pos.x - startPos.x;
+        const dy = pos.y - startPos.y;
+
+        // Only record if actually moved
+        if (Math.abs(dx) >= 2 || Math.abs(dy) >= 2) {
+          const moves = dragStartPositions.map((sp) => ({
+            barId: sp.barId,
+            oldX: sp.x,
+            oldY: sp.y,
+            newX: sp.x + dx,
+            newY: sp.y + dy,
+          }));
+          await invoke("record_move", { moves });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to record move:", err);
+    }
   }
 });
 
