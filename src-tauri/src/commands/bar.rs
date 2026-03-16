@@ -24,7 +24,7 @@ pub fn spawn_bar_window(app: &AppHandle, bar: &BarState) -> Result<(), String> {
     WebviewWindowBuilder::new(app, &bar.label, url)
         .title("Censor Bar")
         .inner_size(bar.width, bar.height)
-        .min_inner_size(20.0, 10.0)
+        .min_inner_size(1.0, 1.0)
         .position(bar.x, bar.y)
         .decorations(false)
         .transparent(true)

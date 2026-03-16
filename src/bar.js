@@ -411,17 +411,38 @@ function startAnimation(preset) {
 
 // --- Context Menu ---
 function showContextMenu(x, y) {
-  contextMenu.style.left = `${x}px`;
-  contextMenu.style.top = `${y}px`;
+  // First make visible off-screen to measure
+  contextMenu.style.left = "-9999px";
+  contextMenu.style.top = "-9999px";
   contextMenu.classList.remove("hidden");
 
-  // Keep menu in viewport
   requestAnimationFrame(() => {
     const rect = contextMenu.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    if (rect.right > vw) contextMenu.style.left = `${vw - rect.width - 4}px`;
-    if (rect.bottom > vh) contextMenu.style.top = `${vh - rect.height - 4}px`;
+    const menuW = rect.width;
+    const menuH = rect.height;
+    const offset = 8; // gap between bar edge and menu
+
+    // Try to position below the click point, offset down from bar
+    let posX = x - menuW / 2; // center on click X
+    let posY = y + offset;
+
+    // If menu goes below viewport, try above
+    if (posY + menuH > vh) {
+      posY = y - menuH - offset;
+    }
+    // If still off-screen (very tall menu), pin to bottom
+    if (posY < 0) {
+      posY = Math.max(4, vh - menuH - 4);
+    }
+
+    // Keep horizontal in bounds
+    if (posX + menuW > vw) posX = vw - menuW - 4;
+    if (posX < 4) posX = 4;
+
+    contextMenu.style.left = `${posX}px`;
+    contextMenu.style.top = `${posY}px`;
   });
 }
 
@@ -434,9 +455,19 @@ surface.addEventListener("contextmenu", (e) => {
   showContextMenu(e.clientX, e.clientY);
 });
 
-document.addEventListener("click", (e) => {
-  if (!contextMenu.contains(e.target)) {
+// Click anywhere outside the menu closes it
+document.addEventListener("mousedown", (e) => {
+  if (!contextMenu.classList.contains("hidden") && !contextMenu.contains(e.target)) {
     hideContextMenu();
+  }
+});
+
+// Escape closes the menu
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !contextMenu.classList.contains("hidden")) {
+    e.preventDefault();
+    hideContextMenu();
+    return;
   }
 });
 
@@ -458,6 +489,8 @@ btnCloseBar.addEventListener("click", () => {
 
 // --- Keyboard Shortcuts (bar-level) ---
 document.addEventListener("keydown", async (e) => {
+  // Escape already handled above for context menu
+
   // Del: Delete this bar (or group)
   if (e.key === "Delete" && isSelected) {
     e.preventDefault();

@@ -22,6 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Windows builds (NSIS installer, MSI installer, portable exe)
 - CI/CD pipeline, documentation, issue templates
 
+### Improved (v0.1.2 — 2026-03-15)
+- **Context menu redesigned** — wider (380px), dark themed, larger color/gradient swatches for easier browsing and selection
+- **Context menu smart positioning** — menu appears offset below or above the click point (not over the bar), centered horizontally, with full viewport-aware repositioning
+- **Context menu dismissal** — click anywhere outside the menu or press Escape to close without selecting; no longer requires clicking a color to dismiss
+- **Bar minimum size reduced** — minimum inner size set to 1×1px, allowing bars to cover small elements like profile pictures or icons
+
 ### Added (v0.1.1 — 2026-03-15)
 - **Dark theme (default)** — panel now ships with a dark theme; light theme available via sun/moon toggle in bottom-right corner
 - **Click-through passthrough mode** — toggle button in panel + Alt+P hotkey; when active, all clicks pass through bars to the content below; bars become purely visual overlays
