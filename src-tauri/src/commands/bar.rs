@@ -24,6 +24,7 @@ pub fn spawn_bar_window(app: &AppHandle, bar: &BarState) -> Result<(), String> {
     WebviewWindowBuilder::new(app, &bar.label, url)
         .title("Censor Bar")
         .inner_size(bar.width, bar.height)
+        .min_inner_size(20.0, 10.0)
         .position(bar.x, bar.y)
         .decorations(false)
         .transparent(true)
@@ -228,6 +229,27 @@ pub async fn toggle_click_through(
 
     trigger_save(&app, &state);
     Ok(new_value)
+}
+
+/// Set click-through on ALL bars (for global passthrough mode).
+#[tauri::command]
+pub async fn set_all_click_through(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    let bars = state.list_bars();
+    for bar in &bars {
+        state.update_bar(&bar.id, |b| {
+            b.click_through = enabled;
+        });
+        if let Some(window) = app.get_webview_window(&bar.label) {
+            let _ = window.set_ignore_cursor_events(enabled);
+        }
+    }
+    trigger_save(&app, &state);
+    log::info!("Set all bars click-through: {}", enabled);
+    Ok(())
 }
 
 /// Set the opacity of a censor bar (0.0 to 1.0).

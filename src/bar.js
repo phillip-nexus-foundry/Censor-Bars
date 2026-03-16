@@ -1,7 +1,11 @@
 /**
  * Bar overlay — runs in each censor bar window.
  * Handles rendering, selection, group movement, right-click context menu,
- * animations, drag undo batching, and keyboard shortcuts.
+ * animations, drag undo batching, gradient orientation, and keyboard shortcuts.
+ *
+ * Click-through passthrough mode: when enabled globally from the panel,
+ * all bar windows have cursor events disabled. ALT+click temporarily
+ * re-enables interaction for that bar.
  */
 
 const { invoke } = window.__TAURI__.core;
@@ -9,7 +13,6 @@ const { getCurrentWindow } = window.__TAURI__.window;
 
 // --- Block ALL default browser context menus globally ---
 document.addEventListener("contextmenu", (e) => {
-  // Only allow our custom context menu, never the browser/WebView default
   e.preventDefault();
 });
 
@@ -28,6 +31,8 @@ const surface = document.getElementById("censor-surface");
 const contextMenu = document.getElementById("context-menu");
 const colorGrid = document.getElementById("color-grid");
 const gradientGrid = document.getElementById("gradient-grid");
+const gradientAngle = document.getElementById("gradient-angle");
+const gradientAngleValue = document.getElementById("gradient-angle-value");
 const animationList = document.getElementById("animation-list");
 const opacitySlider = document.getElementById("opacity-slider");
 const btnCloseBar = document.getElementById("btn-close-bar");
@@ -36,6 +41,7 @@ const btnCloseBar = document.getElementById("btn-close-bar");
 let isSelected = false;
 let currentGroupId = null;
 let groupBadgeEl = null;
+let currentGradientAngle = 135; // degrees — default diagonal
 
 // --- Drag state (for undo batching) ---
 let isDragging = false;
@@ -65,17 +71,21 @@ const COLORS = [
   { name: "Pure White", value: "#ffffff" },
 ];
 
-// --- Gradient Presets ---
+// --- Gradient Presets (stored as color stops, angle applied dynamically) ---
 const GRADIENTS = [
-  { name: "Ocean", css: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" },
-  { name: "Sunset", css: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" },
-  { name: "Forest", css: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)" },
-  { name: "Midnight", css: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)" },
-  { name: "Lava", css: "linear-gradient(135deg, #f12711 0%, #f5af19 100%)" },
-  { name: "Arctic", css: "linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)" },
-  { name: "Cosmos", css: "radial-gradient(ellipse at center, #1a002e 0%, #0d001a 50%, #000000 100%)" },
-  { name: "Neon", css: "linear-gradient(135deg, #00f260 0%, #0575e6 100%)" },
+  { name: "Ocean", stops: "#667eea 0%, #764ba2 100%" },
+  { name: "Sunset", stops: "#f093fb 0%, #f5576c 100%" },
+  { name: "Forest", stops: "#11998e 0%, #38ef7d 100%" },
+  { name: "Midnight", stops: "#0f0c29 0%, #302b63 50%, #24243e 100%" },
+  { name: "Lava", stops: "#f12711 0%, #f5af19 100%" },
+  { name: "Arctic", stops: "#e0eafc 0%, #cfdef3 100%" },
+  { name: "Cosmos", stops: "#1a002e 0%, #0d001a 50%, #000000 100%", radial: true },
+  { name: "Neon", stops: "#00f260 0%, #0575e6 100%" },
 ];
+
+// Current gradient state (for re-applying when angle changes)
+let currentGradientStops = null;
+let currentGradientIsRadial = false;
 
 // --- Animation Presets ---
 const ANIMATIONS = [
@@ -88,6 +98,14 @@ const ANIMATIONS = [
   { name: "Digital Rain", preset: "digitalRain", mood: "energetic" },
   { name: "Lava Flow", preset: "lavaFlow", mood: "relaxing" },
 ];
+
+// --- Build Gradient CSS from stops + angle ---
+function buildGradientCss(stops, angle, isRadial) {
+  if (isRadial) {
+    return `radial-gradient(ellipse at center, ${stops})`;
+  }
+  return `linear-gradient(${angle}deg, ${stops})`;
+}
 
 // --- Build context menu ---
 function buildColorGrid() {
@@ -106,13 +124,20 @@ function buildColorGrid() {
 
 function buildGradientGrid() {
   gradientGrid.innerHTML = GRADIENTS.map(
-    (g) =>
-      `<button class="gradient-swatch" data-css="${g.css}" title="${g.name}" style="background:${g.css}"></button>`
+    (g, i) => {
+      const css = buildGradientCss(g.stops, currentGradientAngle, g.radial);
+      return `<button class="gradient-swatch" data-gradient-idx="${i}" title="${g.name}" style="background:${css}"></button>`;
+    }
   ).join("");
 
   gradientGrid.querySelectorAll(".gradient-swatch").forEach((btn) => {
     btn.addEventListener("click", () => {
-      applyStyle({ kind: "gradient", css: btn.dataset.css });
+      const idx = parseInt(btn.dataset.gradientIdx);
+      const g = GRADIENTS[idx];
+      currentGradientStops = g.stops;
+      currentGradientIsRadial = !!g.radial;
+      const css = buildGradientCss(g.stops, currentGradientAngle, g.radial);
+      applyStyle({ kind: "gradient", css });
       hideContextMenu();
     });
   });
@@ -130,8 +155,38 @@ function buildAnimationList() {
   animationList.querySelectorAll(".animation-option").forEach((btn) => {
     btn.addEventListener("click", () => {
       applyStyle({ kind: "animation", preset: btn.dataset.preset });
+      currentGradientStops = null; // Clear gradient state
       hideContextMenu();
     });
+  });
+}
+
+// --- Gradient Angle Knob ---
+if (gradientAngle) {
+  gradientAngle.addEventListener("input", (e) => {
+    currentGradientAngle = parseInt(e.target.value);
+    if (gradientAngleValue) {
+      gradientAngleValue.textContent = `${currentGradientAngle}°`;
+    }
+    // Update gradient swatches preview
+    gradientGrid.querySelectorAll(".gradient-swatch").forEach((btn) => {
+      const idx = parseInt(btn.dataset.gradientIdx);
+      const g = GRADIENTS[idx];
+      btn.style.background = buildGradientCss(g.stops, currentGradientAngle, g.radial);
+    });
+    // If current bar has a gradient, update it live
+    if (currentGradientStops) {
+      const css = buildGradientCss(currentGradientStops, currentGradientAngle, currentGradientIsRadial);
+      surface.style.background = css;
+    }
+  });
+
+  gradientAngle.addEventListener("change", (e) => {
+    // On release, persist the gradient with new angle
+    if (currentGradientStops) {
+      const css = buildGradientCss(currentGradientStops, currentGradientAngle, currentGradientIsRadial);
+      invoke("update_bar_style", { payload: { barId, style: { kind: "gradient", css } } }).catch(console.error);
+    }
   });
 }
 
@@ -141,16 +196,39 @@ function applyStyleVisual(style) {
   switch (style.kind) {
     case "solid":
       surface.style.background = style.color;
+      currentGradientStops = null;
       break;
     case "gradient":
       surface.style.background = style.css;
+      // Try to parse the gradient stops for angle control
+      parseGradientForAngle(style.css);
       break;
     case "animation":
       startAnimation(style.preset);
+      currentGradientStops = null;
       break;
     case "image":
       surface.style.background = `url(${style.path}) center/${style.fit || "cover"} no-repeat`;
+      currentGradientStops = null;
       break;
+  }
+}
+
+// Extract stops from a CSS gradient string for angle re-application
+function parseGradientForAngle(css) {
+  const linearMatch = css.match(/linear-gradient\((\d+)deg,\s*(.+)\)/);
+  if (linearMatch) {
+    currentGradientAngle = parseInt(linearMatch[1]);
+    currentGradientStops = linearMatch[2];
+    currentGradientIsRadial = false;
+    if (gradientAngle) gradientAngle.value = currentGradientAngle;
+    if (gradientAngleValue) gradientAngleValue.textContent = `${currentGradientAngle}°`;
+  } else if (css.includes("radial-gradient")) {
+    currentGradientIsRadial = true;
+    const radialMatch = css.match(/radial-gradient\([^,]+,\s*(.+)\)/);
+    if (radialMatch) currentGradientStops = radialMatch[1];
+  } else {
+    currentGradientStops = null;
   }
 }
 
@@ -416,7 +494,7 @@ document.addEventListener("keydown", async (e) => {
   if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key >= "0" && e.key <= "9") {
     if (!isSelected) return;
     e.preventDefault();
-    const groupId = parseInt(e.key); // 0-9, where 0 = group 10
+    const groupId = parseInt(e.key);
     try {
       await invoke("group_bars", { barIds: [barId], groupId });
       currentGroupId = groupId;

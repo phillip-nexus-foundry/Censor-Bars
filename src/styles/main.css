@@ -3,29 +3,29 @@
    ======================================== */
 
 :root {
-  /* Light panel theme */
-  --bg-panel: rgba(255, 255, 255, 0.96);
-  --bg-section: #f8f8fa;
-  --bg-hover: #f0f0f4;
-  --bg-active: #e8e8ee;
+  /* Dark panel theme (default) */
+  --bg-panel: rgba(30, 30, 36, 0.97);
+  --bg-section: #252530;
+  --bg-hover: #2a2a38;
+  --bg-active: #333344;
 
-  --text-primary: #222222;
-  --text-secondary: #7a7a7a;
-  --text-muted: #a0a0a8;
+  --text-primary: #e8e8ec;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6a6a7a;
   --text-on-accent: #ffffff;
 
   --accent: #667eea;
-  --accent-hover: #5a6fd6;
-  --accent-light: rgba(102, 126, 234, 0.1);
-  --accent-medium: rgba(102, 126, 234, 0.2);
+  --accent-hover: #7b90f0;
+  --accent-light: rgba(102, 126, 234, 0.15);
+  --accent-medium: rgba(102, 126, 234, 0.25);
 
   --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --danger-light: rgba(239, 68, 68, 0.08);
+  --danger-hover: #f87171;
+  --danger-light: rgba(239, 68, 68, 0.12);
 
-  --border: #eaeaea;
-  --border-strong: #dadadf;
-  --divider: #f2f2f2;
+  --border: #3a3a48;
+  --border-strong: #4a4a58;
+  --divider: #2a2a34;
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -34,11 +34,35 @@
   --radius-xl: 12px;
   --radius-full: 9999px;
 
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
 
   --transition: 150ms ease;
   --transition-fast: 100ms ease;
+}
+
+/* Light theme override */
+[data-theme="light"] {
+  --bg-panel: rgba(255, 255, 255, 0.96);
+  --bg-section: #f8f8fa;
+  --bg-hover: #f0f0f4;
+  --bg-active: #e8e8ee;
+
+  --text-primary: #222222;
+  --text-secondary: #7a7a7a;
+  --text-muted: #a0a0a8;
+
+  --accent-light: rgba(102, 126, 234, 0.1);
+  --accent-medium: rgba(102, 126, 234, 0.2);
+
+  --danger-light: rgba(239, 68, 68, 0.08);
+
+  --border: #eaeaea;
+  --border-strong: #dadadf;
+  --divider: #f2f2f2;
+
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 *,
@@ -78,7 +102,7 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition);
-  background: white;
+  background: var(--bg-section);
   color: var(--text-primary);
   font-family: inherit;
   line-height: 1;
@@ -117,7 +141,7 @@ body {
 .btn-icon-only {
   padding: 5px 8px;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--bg-section);
 }
 
 .btn-icon-only:hover:not(:disabled) {
@@ -128,6 +152,69 @@ body {
   font-size: 16px;
   font-weight: 600;
   line-height: 1;
+}
+
+/* --- Passthrough Toggle Button --- */
+
+.btn-passthrough {
+  position: relative;
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition: all 200ms ease;
+}
+
+.btn-passthrough.active {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: #34d399;
+  color: #34d399;
+  box-shadow: 0 0 8px rgba(52, 211, 153, 0.2);
+}
+
+.btn-passthrough .passthrough-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 200ms ease;
+}
+
+.btn-passthrough.active .passthrough-indicator {
+  background: #34d399;
+  box-shadow: 0 0 4px #34d399;
+}
+
+/* --- Theme Toggle --- */
+
+.theme-toggle {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+  z-index: 5;
+}
+
+.theme-toggle:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  transform: rotate(15deg);
+}
+
+.theme-toggle svg {
+  width: 16px;
+  height: 16px;
 }
 
 kbd {

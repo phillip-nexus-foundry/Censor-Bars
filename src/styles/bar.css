@@ -322,6 +322,36 @@ body {
   color: #d97706;
 }
 
+/* --- Gradient Angle Control --- */
+
+.gradient-angle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+}
+
+.gradient-angle-label {
+  font-size: 10px;
+  color: #a0a0a8;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.gradient-angle-slider {
+  flex: 1;
+  accent-color: #667eea;
+  height: 4px;
+}
+
+.gradient-angle-display {
+  font-size: 10px;
+  font-weight: 600;
+  color: #667eea;
+  min-width: 32px;
+  text-align: right;
+}
+
 /* --- Opacity Slider --- */
 
 .opacity-slider {

@@ -1,6 +1,7 @@
 /**
  * Control Panel — Handy-style floating panel.
- * Manages bar list, groups, undo/redo indicators, and tray behavior.
+ * Manages bar list, groups, undo/redo, theme toggle,
+ * click-through passthrough mode, and tray behavior.
  */
 
 const { invoke } = window.__TAURI__.core;
@@ -12,12 +13,18 @@ const btnMinimize = document.getElementById("btn-minimize");
 const btnClose = document.getElementById("btn-close");
 const btnUndo = document.getElementById("btn-undo");
 const btnRedo = document.getElementById("btn-redo");
+const btnPassthrough = document.getElementById("btn-passthrough");
+const btnThemeToggle = document.getElementById("btn-theme-toggle");
+const iconSun = document.getElementById("icon-sun");
+const iconMoon = document.getElementById("icon-moon");
 const historyStatus = document.getElementById("history-status");
 const barListEl = document.getElementById("bar-list");
 
 // --- State ---
 let bars = [];
 let groups = [];
+let passthroughActive = false;
+let currentTheme = localStorage.getItem("censor-bars-theme") || "dark";
 
 // --- Window behavior: close to tray ---
 const appWindow = getCurrentWindow();
@@ -29,6 +36,45 @@ btnClose.addEventListener("click", () => {
 btnMinimize.addEventListener("click", () => {
   appWindow.hide();
 });
+
+// --- Theme Toggle ---
+function applyTheme(theme) {
+  currentTheme = theme;
+  if (theme === "light") {
+    document.documentElement.setAttribute("data-theme", "light");
+    iconSun.style.display = "none";
+    iconMoon.style.display = "block";
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+    iconSun.style.display = "block";
+    iconMoon.style.display = "none";
+  }
+  localStorage.setItem("censor-bars-theme", theme);
+}
+
+btnThemeToggle.addEventListener("click", () => {
+  applyTheme(currentTheme === "dark" ? "light" : "dark");
+});
+
+// Apply saved theme on load
+applyTheme(currentTheme);
+
+// --- Click-Through Passthrough Mode ---
+async function togglePassthrough() {
+  passthroughActive = !passthroughActive;
+  btnPassthrough.classList.toggle("active", passthroughActive);
+
+  try {
+    await invoke("set_all_click_through", { enabled: passthroughActive });
+  } catch (err) {
+    console.error("Failed to toggle passthrough:", err);
+    // Revert UI on failure
+    passthroughActive = !passthroughActive;
+    btnPassthrough.classList.toggle("active", passthroughActive);
+  }
+}
+
+btnPassthrough.addEventListener("click", togglePassthrough);
 
 // --- Create bar ---
 async function createBar() {
@@ -229,7 +275,6 @@ function attachListeners() {
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const gid = parseInt(btn.dataset.deleteGroup);
-      // Delete all bars in the group
       const groupBars = bars.filter((b) => b.groupId === gid);
       if (groupBars.length > 0) {
         try {
@@ -251,6 +296,13 @@ document.addEventListener("keydown", (e) => {
   if (e.ctrlKey && !e.shiftKey && !e.altKey && e.key === "n") {
     e.preventDefault();
     createBar();
+    return;
+  }
+
+  // Alt+P: Toggle passthrough mode
+  if (e.altKey && !e.ctrlKey && !e.shiftKey && (e.key === "p" || e.key === "P")) {
+    e.preventDefault();
+    togglePassthrough();
     return;
   }
 

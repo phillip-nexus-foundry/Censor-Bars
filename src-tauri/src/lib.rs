@@ -18,15 +18,16 @@ pub fn run() {
         .setup(|app| {
             log::info!("Censor Bars starting");
 
-            // Create tray menu with Exit option
-            let quit_item = MenuItem::with_id(app, "quit", "Exit", true, None::<&str>)?;
+            // Create tray menu with Exit option (only shows on right-click)
+            let quit_item = MenuItem::with_id(app, "quit", "Exit Censor Bars", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit_item])?;
 
-            // Set up tray icon with click handlers
+            // Set up tray icon — left click restores panel, right click shows menu
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .tooltip("Censor Bars")
                 .menu(&menu)
+                .show_menu_on_left_click(false) // Don't show menu on left click
                 .on_menu_event(|app, event| {
                     if event.id() == "quit" {
                         log::info!("Exit requested from tray menu");
@@ -38,15 +39,12 @@ pub fn run() {
                         if button == tauri::tray::MouseButton::Left {
                             // Left click: show/restore the control panel window
                             if let Some(window) = tray.app_handle().get_webview_window("control-panel") {
-                                if let Err(e) = window.show() {
-                                    log::error!("Failed to show window: {}", e);
-                                }
-                                if let Err(e) = window.set_focus() {
-                                    log::error!("Failed to focus window: {}", e);
-                                }
+                                let _ = window.unminimize();
+                                let _ = window.show();
+                                let _ = window.set_focus();
                             }
                         }
-                        // Right click is handled automatically by the menu
+                        // Right click shows the menu automatically
                     }
                 })
                 .build(app)?;
@@ -63,6 +61,7 @@ pub fn run() {
             commands::bar::list_bars,
             commands::bar::update_bar_style,
             commands::bar::toggle_click_through,
+            commands::bar::set_all_click_through,
             commands::bar::set_bar_opacity,
             commands::bar::update_bar_position,
             commands::bar::record_move,
